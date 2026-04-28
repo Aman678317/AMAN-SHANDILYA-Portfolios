@@ -49,14 +49,32 @@ export default function Contact() {
 
   const handleChange = f => e => setForm(p => ({ ...p, [f]: e.target.value }))
 
-  const handleSubmit = async e => {
-    e.preventDefault()
-    setStatus('loading')
-    await new Promise(r => setTimeout(r, 1500))
-    setStatus('success')
-    setForm({ name: '', email: '', subject: '', message: '' })
-    setTimeout(() => setStatus('idle'), 5000)
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('loading');
+    try {
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (response.ok) {
+        setStatus('success');
+        setForm({ name: '', email: '', subject: '', message: '' });
+      } else {
+        const errorData = await response.json();
+        console.error('Submission failed:', errorData.error);
+        setStatus('error');
+      }
+    } catch (err) {
+      console.error('Network error:', err);
+      setStatus('error');
+    }
+    setTimeout(() => setStatus('idle'), 5000);
+  };
 
   const contacts = [
     { emoji: '📧', label: 'Email', value: 'shandilyaprahald@gmail.com', href: 'mailto:shandilyaprahald@gmail.com' },
